@@ -1,0 +1,151 @@
+<!DOCTYPE html> <html lang="en"> 
+    <head> <meta charset="UTF-8" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+        <title>Ultimate Weather Dashboard</title> <script src="https://cdn.tailwindcss.com">
+        </script> 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js">
+        </script> 
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous">
+        </script> <style> body { background-size: cover; background-position: center; background-attachment: fixed; transition: background-image 1s ease-in-out; font-family: 'Inter', sans-serif; } .fade-in { animation: fadeIn 0.8s ease-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } .tab-active { border-bottom: 3px solid #6366f1; color: #6366f1; } .parallax { transform: translateZ(0); } .glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); transition: box-shadow 0.3s ease; } .glow:hover { box-shadow: 0 0 30px rgba(99, 102, 241, 0.8); } .weather-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; } @media (max-width: 768px) { .weather-cards { grid-template-columns: 1fr; } } </style> </head> <body class="min-h-screen bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500 text-white"> <!-- Dynamic Background --> <div class="fixed inset-0 bg-cover bg-center" id="dynamic-bg"></div> <div class="relative z-10 container mx-auto p-6 max-w-7xl fade-in"> <!-- Header --> <header class="text-center mb-8"> <h1 class="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-yellow-300 mb-4"><i class="fas fa-cloud-sun"></i> Ultimate Weather Dashboard</h1> <p class="text-lg md:text-xl text-gray-200">Stay informed with live weather data, stunning visuals, and interactive forecasts</p> 
+        </header>
+<section class="flex flex-wrap justify-center items-center gap-4 mb-8">
+  <input type="text" id="city-input" placeholder="Enter city name..." class="p-4 rounded-full bg-white/80 text-gray-800 placeholder-gray-500 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-400 w-80 shadow-lg" />
+  <button id="search-btn" class="p-4 bg-indigo-600 hover:bg-indigo-700 rounded-full text-white transition-all duration-300 shadow-lg glow"><i class="fas fa-search"></i></button>
+  <button id="geo-btn" class="p-4 bg-green-600 hover:bg-green-700 rounded-full text-white transition-all duration-300 shadow-lg glow"><i class="fas fa-location-arrow"></i></button>
+  <select id="unit-select" class="p-4 rounded-full bg-white/80 text-gray-800 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-400 shadow-lg">
+    <option value="metric">°C, km/h</option>
+    <option value="imperial">°F, mph</option>
+    <option value="kelvin">K</option>
+  </select>
+</section>
+
+<!-- Loading -->
+<div id="loading" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="text-center">
+    <div class="inline-block w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p class="text-white text-xl">Fetching weather data...</p>
+  </div>
+</div>
+
+<!-- Current Weather -->
+<section class="bg-white/20 backdrop-blur-xl rounded-3xl p-8 mb-8 shadow-2xl glow">
+  <div class="flex flex-wrap items-center justify-between mb-6">
+    <div class="flex items-center space-x-4">
+      <img id="weather-icon" alt="Clear sunny sky with gentle breeze and warm sunlight" class="w-32 h-32 rounded-full shadow-xl" src="https://placehold.co/128x128/png?text=Sunny" />
+      <div>
+        <h2 id="city-name" class="text-3xl font-bold text-white">New York</h2>
+        <p id="date-time" class="text-gray-200">Friday, 15 October 2023</p>
+      </div>
+    </div>
+    <div class="text-right">
+      <p id="temperature" class="text-6xl font-extrabold text-yellow-300 mb-2">22°C</p>
+      <p id="description" class="text-lg text-gray-200">Clear sky</p>
+    </div>
+  </div>
+  <div class="weather-cards">
+    <div class="bg-gradient-to-r from-blue-500 to-cyan-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-thermometer-half text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">Heat Index</p>
+      <p id="heat-index" class="text-3xl font-bold">24°C</p>
+    </div>
+    <div class="bg-gradient-to-r from-green-500 to-emerald-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-tint text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">Humidity</p>
+      <p id="humidity" class="text-3xl font-bold">65%</p>
+    </div>
+    <div class="bg-gradient-to-r from-purple-500 to-violet-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-wind text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">Wind Speed</p>
+      <p id="wind-speed" class="text-3xl font-bold">5 km/h</p>
+    </div>
+    <div class="bg-gradient-to-r from-yellow-500 to-orange-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-cloud-rain text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">Rain Chance</p>
+      <p id="rain-chance" class="text-3xl font-bold">10%</p>
+    </div>
+    <div class="bg-gradient-to-r from-red-500 to-pink-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-eye text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">Visibility</p>
+      <p id="visibility" class="text-3xl font-bold">10 km</p>
+    </div>
+    <div class="bg-gradient-to-r from-teal-500 to-blue-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-compress-arrows-alt text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">Pressure</p>
+      <p id="pressure" class="text-3xl font-bold">1013 hPa</p>
+    </div>
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-sun text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">UV Index</p>
+      <p id="uv-index" class="text-3xl font-bold">3</p>
+    </div>
+    <div class="bg-gradient-to-r from-cyan-500 to-blue-500 p-6 rounded-2xl shadow-lg text-center hover:scale-105 transition-transform duration-300">
+      <i class="fas fa-clock text-white text-3xl mb-2"></i>
+      <p class="text-white text-lg">Sunrise</p>
+      <p id="sunrise" class="text-xl font-bold">06:30</p>
+    </div>
+  </div>
+</section>
+
+<!-- Tabs -->
+<section>
+  <div class="flex justify-center mb-6">
+    <button id="hourly-tab" class="tab-active mx-2 py-2 px-6 rounded-full bg-white/20 text-white transition-all duration-300">Hourly</button>
+    <button id="daily-tab" class="mx-2 py-2 px-6 rounded-full bg-white/20 text-white transition-all duration-300">7-Day</button>
+    <button id="graph-tab" class="mx-2 py-2 px-6 rounded-full bg-white/20 text-white transition-all duration-300">Graphs</button>
+    <button id="map-tab" class="mx-2 py-2 px-6 rounded-full bg-white/20 text-white transition-all duration-300">Map View</button>
+  </div>
+
+  <!-- Forecasts -->
+  <div id="hourly-forecast" class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8"></div>
+  <div id="daily-forecast" class="hidden grid gap-4 mb-8"></div>
+  <div id="graph-section" class="hidden bg-white/20 rounded-2xl p-6 mb-8">
+    <canvas id="weather-chart"></canvas>
+  </div>
+  <div id="map-section" class="hidden bg-white/20 rounded-2xl p-6 mb-8">
+    <img id="weather-map" alt="Interactive weather map showing temperature overlay for the selected city" class="w-full h-96 rounded-xl" src="https://placehold.co/800x400/png?text=Weather+Map" />
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="text-center text-gray-300">
+  <p>Powered by OpenWeatherMap API | Last updated: <span id="last-updated">Just now</span></p>
+</footer>
+</div> <script> const apiKey = 'b6bcc6fc3bb4cf04273ead5be8b9f623'; // Replace with your actual API key 
+// DOM Elements 
+const cityInput = document.getElementById('city-input'); 
+const searchBtn = document.getElementById('search-btn'); 
+const geoBtn = document.getElementById('geo-btn'); 
+const unitSelect = document.getElementById('unit-select'); 
+const loading = document.getElementById('loading'); 
+const temperature = document.getElementById('temperature'); 
+const description = document.getElementById('description'); 
+const cityName = document.getElementById('city-name'); 
+const dateTime = document.getElementById('date-time'); 
+const weatherIcon = document.getElementById('weather-icon'); 
+const dynamicBg = document.getElementById('dynamic-bg'); 
+const hourlyForecast = document.getElementById('hourly-forecast'); 
+const dailyForecast = document.getElementById('daily-forecast'); 
+const graphSection = document.getElementById('graph-section'); 
+const mapSection = document.getElementById('map-section'); 
+const lastUpdated = document.getElementById('last-updated'); 
+let units = 'metric'; let currentData = null; let chart = null; 
+// Utility Functions 
+function updateLastUpdated() { lastUpdated.textContent = new Date().toLocaleString(); } 
+function formatDateTime(date) { return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }); } 
+function unixToTime(unix) { const date = new Date(unix * 1000); return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } 
+function setBackground(weather) { const images = { clear: "pexels-asphotograpy-96622.jpg", rain: 'https://placehold.co/1920x1080/png?text=Heavy+rain+pouring+from+dark+stormy+clouds+onto+wet+city+streets+with+puddles+reflecting+light', snow: 'https://placehold.co/1920x1080/png?text=Snowy+winter+landscape+with+thick+white+snow+covered+ground+and+gently+falling+snowflakes+under+a+gray+sky', thunderstorm: 'https://placehold.co/1920x1080/png?text=Violent+stormy+sky+with+dark+clouds+lightning+flashes+and+heavy+rain+windswept+trees', mist: 'https://placehold.co/1920x1080/png?text=Misty+morning+fog+blanketing+a+serene+lake+with+trees+silhouetted+against+a+soft+white+haze' }; 
+dynamicBg.style.backgroundImage = `url('${images[weather.toLowerCase()] || images.clear}')`; } // API Fetch Functions 
+async function fetchWeather({ city, lat, lon }) 
+{ loading.classList.remove('hidden'); let url = ''; 
+if (city) { url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=${units}`; } 
+else if (lat && lon) { url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${units}`; } 
+try { const response = await fetch(url); if (!response.ok) throw new Error('City not found'); const data = await response.json(); currentData = data; displayCurrentWeather(data); fetchForecast(data.coord.lat, data.coord.lon); updateLastUpdated(); } catch (error) { alert(error.message); } finally { loading.classList.add('hidden'); } } 
+async function fetchForecast(lat, lon) { const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${units}`; try { const response = await fetch(url); if (!response.ok) throw new Error('Forecast not available'); const data = await response.json(); displayForecasts(data); displayGraph(data); displayMap(lat, lon); } catch (error) { console.error(error.message); } } 
+function displayCurrentWeather(data) { cityName.textContent = `${data.name}, ${data.sys.country}`; dateTime.textContent = formatDateTime(new Date()); temperature.textContent = `${Math.round(data.main.temp)}°${units === 'metric' ? 'C' : units === 'imperial' ? 'F' : 'K'}`; description.textContent = data.weather[0].description; document.getElementById('heat-index').textContent = `${Math.round(data.main.feels_like)}°${units === 'metric' ? 'C' : units === 'imperial' ? 'F' : 'K'}`; document.getElementById('humidity').textContent = `${data.main.humidity}%`; document.getElementById('wind-speed').textContent = `${data.wind.speed} ${units === 'metric' ? 'km/h' : units === 'imperial' ? 'mph' : 'm/s'}`; document.getElementById('rain-chance').textContent = `${Math.round((data.weather[0].main.toLowerCase().includes('rain') ? 80 : 10))}%`; document.getElementById('visibility').textContent = `${data.visibility / 1000} km`; document.getElementById('pressure').textContent = `${data.main.pressure} hPa`; document.getElementById('sunrise').textContent = unixToTime(data.sys.sunrise); document.getElementById('uv-index').textContent = '3'; 
+// Approximate 
+weatherIcon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`; setBackground(data.weather[0].main); } function displayForecasts(data) { // Hourly 
+hourlyForecast.innerHTML = ''; data.list.slice(0, 24).forEach(item => { const card = document.createElement('div'); card.className = 'bg-white/10 backdrop-blur-sm p-4 rounded-xl text-center hover:bg-white/20 transition duration-300'; card.innerHTML = ` <p class="text-sm font-bold">${unixToTime(item.dt)}</p> <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" alt="${item.weather[0].description}" class="w-16 h-16 mx-auto" /> <p class="text-xl font-bold">${Math.round(item.main.temp)}°</p> `; hourlyForecast.appendChild(card); }); // Daily
+ dailyForecast.innerHTML = ''; data.list.filter((_, i) => i % 8 === 0).slice(0, 7).forEach(item => { const card = document.createElement('div'); card.className = 'bg-white/10 backdrop-blur-sm p-6 rounded-xl flex justify-between items-center hover:bg-white/20 transition duration-300'; card.innerHTML = ` <div> <p class="font-bold">${new Date(item.dt * 1000).toLocaleDateString()}</p> <p class="capitalize">${item.weather[0].description}</p> </div> <div class="text-right"> <p class="text-xl font-bold">${Math.round(item.main.temp_min)}° / ${Math.round(item.main.temp_max)}°</p> <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" alt="${item.weather[0].description}" class="w-16 h-16" /> </div> `; dailyForecast.appendChild(card); }); } function displayGraph(data) { if (chart) chart.destroy(); const ctx = document.getElementById('weather-chart').getContext('2d'); const labels = data.list.slice(0, 24).map(item => unixToTime(item.dt)); const temps = data.list.slice(0, 24).map(item => item.main.temp); const humidities = data.list.slice(0, 24).map(item => item.main.humidity); chart = new Chart(ctx, { type: 'line', data: { labels, datasets: [ { label: 'Temperature', data: temps, borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.3)', tension: 0.3 }, { label: 'Humidity', data: humidities, borderColor: '#22d3ee', backgroundColor: 'rgba(34, 211, 238, 0.3)', tension: 0.3 } ] }, options: { responsive: true, plugins: { title: { display: true, text: 'Temperature & Humidity Forecast' } }, scales: { y: { beginAtZero: false } } } }); } function displayMap(lat, lon) { document.getElementById('weather-map').src = `https://placehold.co/800x400/png?text=Weather+Map+for+${lat}+${lon}`; } // Event Listeners 
+ searchBtn.addEventListener('click', () => { const city = cityInput.value.trim(); if (city) fetchWeather({ city }); }); cityInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchBtn.click(); }); geoBtn.addEventListener('click', () => { if (!navigator.geolocation) return alert('Geolocation not supported'); navigator.geolocation.getCurrentPosition( pos => fetchWeather({ lat: pos.coords.latitude, lon: pos.coords.longitude }), () => alert('Location access denied') ); }); unitSelect.addEventListener('change', () => { units = unitSelect.value; if (currentData) displayCurrentWeather(currentData); }); // Tabs 
+ document.getElementById('hourly-tab').addEventListener('click', () => { document.querySelectorAll('button[id$="-tab"]').forEach(b => b.classList.remove('tab-active')); document.getElementById('hourly-tab').classList.add('tab-active'); hourlyForecast.classList.remove('hidden'); dailyForecast.classList.add('hidden'); graphSection.classList.add('hidden'); mapSection.classList.add('hidden'); }); document.getElementById('daily-tab').addEventListener('click', () => { document.querySelectorAll('button[id$="-tab"]').forEach(b => b.classList.remove('tab-active')); document.getElementById('daily-tab').classList.add('tab-active'); hourlyForecast.classList.add('hidden'); dailyForecast.classList.remove('hidden'); graphSection.classList.add('hidden'); mapSection.classList.add('hidden'); }); document.getElementById('graph-tab').addEventListener('click', () => { document.querySelectorAll('button[id$="-tab"]').forEach(b => b.classList.remove('tab-active')); document.getElementById('graph-tab').classList.add('tab-active'); hourlyForecast.classList.add('hidden'); dailyForecast.classList.add('hidden'); graphSection.classList.remove('hidden'); mapSection.classList.add('hidden'); }); document.getElementById('map-tab').addEventListener('click', () => { document.querySelectorAll('button[id$="-tab"]').forEach(b => b.classList.remove('tab-active')); document.getElementById('map-tab').classList.add('tab-active'); hourlyForecast.classList.add('hidden'); dailyForecast.classList.add('hidden'); graphSection.classList.add('hidden'); mapSection.classList.remove('hidden'); }); // Initialize 
+ navigator.geolocation?.getCurrentPosition( pos => fetchWeather({ lat: pos.coords.latitude, lon: pos.coords.longitude }), () => alert('Please search for a city') ); </script> </body> </html> </content> </create_file>
